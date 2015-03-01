@@ -12,40 +12,40 @@
 import matplotlib.pylab as plt
 import array as array
 import numpy as np
+import multiprocessing as mp
 
 # --- set parameters ---
 
 r0 = 0.76
 rmax = 1.0
-dr = 0.01
+dr = 0.001
 ntransient = 1000
 n_calc = 100000
 x0 = 0.5
 
 nmax = ntransient + n_calc
 
+pr = mp.cpu_count() * 2
 
 def lambda_for_r():
     if (rmax - r0) % dr == 0:
         count = int((rmax - r0) / dr) - 1
     else:
         count = int((rmax - r0) / dr)
-    r = array.array('f')
-    _lambda = array.array('f')
-    for n in range(count + 1):
-        _r = r0 + dr * n
-        r.append(_r)
-        _lambda.append(get_lambda_r(func, _r))
+    r = [r0 + dr*n for n in np.arange(count + 1)]
     r.append(rmax)
-    _lambda.append(get_lambda_r(func, rmax))
+    r = np.array(r)
+    _lambda = array.array('f')
+    pool = mp.Pool(pr)
+
+    _lambda = np.array(pool.map(get_lambda_r, r))
     return r, _lambda
 
 
-def func(x_i, r):
-    return 4.0 * r * x_i * (1.0 - x_i)
+def get_lambda_r(r):
+    def function(x_i, r):
+        return 4.0 * r * x_i * (1.0 - x_i)
 
-
-def get_lambda_r(function, r):
     x = array.array('d')
     x.append(x0)
     for i in np.arange(nmax):

@@ -58,8 +58,8 @@ class CalculateLambda():
 
         parameter0 = [1.0, 1.0]
             # initial value of parameters a, b (ln||=a*n+b)
-        n = range(1, nplot + 1)
+        n = np.arange(1, nplot + 1)
         result = optimize.leastsq(fit_func, parameter0,
-                                  args=(np.array(n), np.array(lya))
+                                  args=(n, np.array(lya))
                                   )
         return result[0][0]
